@@ -1,7 +1,6 @@
 venv/
 
 serviceAccountKey.json
-users.json
 .env
 
 
