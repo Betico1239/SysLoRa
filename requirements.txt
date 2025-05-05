@@ -1,0 +1,9 @@
+streamlit
+firebase-admin
+streamlit-autorefresh
+uvicorn
+fastapi
+ngrok
+pytz
+pandas
+plotly
