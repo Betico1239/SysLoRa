@@ -9,6 +9,7 @@ if "auth_status" not in st.session_state:
     st.session_state.username = ""
 
 
+
 # Configuración de la página
 st.set_page_config(page_title="SysLoRa Dashboard", page_icon="logo.png", layout="wide")
 
@@ -23,6 +24,10 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 if not st.session_state.auth_status:
+
+    # Cargar imagen desde archivo local
+    st.image("logo.png", width=100)
+
     st.title("🔐 Ingreso al sistema Lora TTN")
 
     username = st.text_input("Usuario")

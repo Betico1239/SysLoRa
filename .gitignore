@@ -7,6 +7,9 @@ serviceAccountKey.json
 __pycache__/
 *.log
 *.pyc
+debug.log
 
 ngrok_recovery_codes.txt
 serviceAccountKey.json
+
+webhookkey: "NNSXS.L5242BOAYZP35R32SVKYDRB2SN2NR5HJOA7ROVI.2WUF6T5CZWBBEIAXM3LKX25P4VBJTKVKXM3DHFMV3NKS5HO2BAQA"

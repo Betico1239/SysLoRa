@@ -29,35 +29,57 @@ async def uplink_handler(request: Request):
     body = await request.json()
     print("📡 Datos recibidos de TTN:", body)
 
-    # Obtener el ID del dispositivo que envió los datos
     device_id = body.get("end_device_ids", {}).get("device_id", "desconocido")
-
-    # Extraer payload decodificado
     payload = body.get("uplink_message", {}).get("decoded_payload", {})
 
-    # Validación del payload
-    if "Humedad" not in payload or "HumoMQ7" not in payload or "UV" not in payload:
-        return {"status": "error", "message": "Datos incompletos", "device": device_id}
+    # Extraer rx_metadata si existe
+    rx_metadata = body.get("uplink_message", {}).get("rx_metadata", [])
+    signal_data = {}
 
-    # Obtener fecha y hora actual en zona horaria de Colombia
+    if rx_metadata and isinstance(rx_metadata, list):
+        first_metadata = rx_metadata[0]  # Solo usamos el primer gateway por ahora
+        signal_data = {
+            "rssi": first_metadata.get("rssi"),
+            "snr": first_metadata.get("snr"),
+            "channel_rssi": first_metadata.get("channel_rssi"),
+            "frequency_offset": first_metadata.get("frequency_offset"),
+            "timestamp_radio": first_metadata.get("timestamp"),
+            "gateway_id": first_metadata.get("gateway_ids", {}).get("gateway_id"),
+            "channel_index": first_metadata.get("channel_index"),
+        }
+
     colombia_time = datetime.now(colombia_tz)
-    valid_time = colombia_time.strftime("%Y%m%dT%H%M%S")
+    valid_time = colombia_time.strftime("%Y-%m-%dT%H:%M:%S%z")
 
-    # Ruta del histórico: /historico/usr1/{device_id}/{fecha}
+    # Validación según el dispositivo
+    if device_id.startswith("cube-cell"):
+        if not all(k in payload for k in ["Humedad", "HumoMQ7", "UV"]):
+            return {"status": "error", "message": "Datos incompletos del CubeCell", "device": device_id}
+    elif device_id.startswith("lsn50"):
+        if not all(k in payload for k in ["BatV", "TempC1"]):
+            return {"status": "error", "message": "Datos incompletos del LSN50", "device": device_id}
+    else:
+        return {"status": "error", "message": "Dispositivo no reconocido", "device": device_id}
+
+    # Guardar en Firebase
     historico_ref = get_db_ref(f"/historico/usr1/{device_id}")
     if historico_ref:
-        historico_ref.child(valid_time).set(payload)
-        print("✅ Datos guardados en histórico.")
+        historico_ref.child(valid_time).set({
+            "sensor_data": payload,
+            "signal_quality": signal_data
+        })
 
-    # Ruta del último dato: /ultimo/usr1/{device_id}
     ultimo_ref = get_db_ref(f"/ultimo/usr1/{device_id}")
     if ultimo_ref:
-        payload_con_fecha = payload.copy()
-        payload_con_fecha["fecha"] = valid_time  # añade timestamp al último payload
+        payload_con_fecha = {
+            "sensor_data": payload,
+            "signal_quality": signal_data,
+            "fecha": valid_time
+        }
         ultimo_ref.set(payload_con_fecha)
-        print("🆕 Último dato actualizado.")
 
     return {"status": "ok", "device": device_id, "carga": payload}
+
 
 
 # Función para iniciar ngrok
