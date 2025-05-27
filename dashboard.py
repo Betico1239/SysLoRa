@@ -28,7 +28,7 @@ if not st.session_state.auth_status:
     # Cargar imagen desde archivo local
     st.image("logo.png", width=100)
 
-    st.title("🔐 Ingreso al sistema Lora TTN")
+    st.title("🔐 Ingreso: Sistema Syslora")
 
     username = st.text_input("Usuario")
     password = st.text_input("Contraseña", type="password")

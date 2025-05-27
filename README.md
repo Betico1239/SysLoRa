@@ -118,7 +118,8 @@ syslora_dashboard/
 ├── .env                   # Variables de entorno para configuraciones secretas
 ├── auth.py                # Lógica de autenticación
 ├── dashboard.py           # Código para el dashboard de Streamlit
-├── firebase.py            # Conexión y manejo de Firebase
+├── firebase.py            # Conexión y manejo de Firebase para dashboard
+├── firebase2.py           # Conexión y manejo de Firebase para main.py - Replit
 ├── main.py                # Backend de FastAPI
 ├── ngrok_recovery_codes.txt # Códigos de recuperación de ngrok (opcional)
 ├── README.md              # Documentación del proyecto
